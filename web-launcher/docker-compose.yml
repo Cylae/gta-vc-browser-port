@@ -1,0 +1,10 @@
+services:
+  web-launcher:
+    image: ghcr.io/developeranku/gta-vc-browser-port-web:latest
+    build:
+      context: .
+      args:
+        PUBLIC_GAME_URL: ${PUBLIC_GAME_URL:-https://engine.gtavice.city:8443}
+    ports:
+      - "8080:4321"
+    restart: unless-stopped

@@ -34,6 +34,18 @@ docker compose up -d
 
 Compose pulls the same `:latest` image. Add `--build` only if you want to rebuild locally.
 
+## Quick start (web launcher, prebuilt image)
+
+```bash
+docker run -d \
+  --name gtavc-web \
+  -p 8080:4321 \
+  --restart unless-stopped \
+  ghcr.io/developeranku/gta-vc-browser-port-web:latest
+```
+
+Open `http://localhost:8080`. The image ships with `PUBLIC_GAME_URL=https://engine.gtavice.city:8443` baked in at build time (it's a static site, no runtime env vars). To point at a different backend, build your own image: `docker build --build-arg PUBLIC_GAME_URL=https://your-host:8443 -t my-web-launcher web-launcher/`.
+
 ## Repo layout
 
 ```
@@ -46,10 +58,13 @@ gta-vc-browser-port/
 │
 ├── web-launcher/       Standalone landing page wrapping the backend in an iframe.
 │   ├── src/            Astro sources
+│   ├── Dockerfile      Builds Astro, serves it via `astro preview`
+│   ├── docker-compose.yml
 │   └── README.md       Launcher docs, dev setup, sandbox details
 │
 └── .github/workflows/
-    └── build-engine.yml   Builds and pushes the engine image to GHCR on push to main
+    ├── build-engine.yml        Builds and pushes the engine image to GHCR on push to main
+    └── build-web-launcher.yml  Builds and pushes the web-launcher image to GHCR on push to main
 ```
 
 ## Components
