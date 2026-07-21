@@ -18,11 +18,7 @@ export default defineConfig({
   server: {
     port: 4321,
     host: true,
-  },
-  vite: {
-    preview: {
-      allowedHosts: ['gtavice.city', 'www.gtavice.city'],
-    },
+    allowedHosts: ['gtavice.city', 'www.gtavice.city'],
   },
   devToolbar: {
     enabled: false,
