@@ -164,7 +164,7 @@ def uleb128_size(value: int) -> int:
 
 # ============== FOLDER/FILE SIGNATURE ==============
 
-@dataclass
+@dataclass(slots=True)
 class FolderSignature:
     """Signature of a folder for deduplication."""
     path: str
@@ -217,7 +217,7 @@ class FolderSignature:
         return self.files == other.files
 
 
-@dataclass
+@dataclass(slots=True)
 class FileInfo:
     """Information about a file for deduplication."""
     folder_path: str
@@ -1100,7 +1100,7 @@ async def stream_unpack_to_disk_async(chunks: AsyncIterator[bytes], output_dir: 
 
 # ============== PACKED ARCHIVE CLASS ==============
 
-@dataclass
+@dataclass(slots=True)
 class FileEntry:
     """Information about a file in the archive."""
     folder: str

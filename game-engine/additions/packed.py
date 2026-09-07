@@ -193,54 +193,38 @@ def _is_br_file(path: str) -> bool:
     return path.lower().endswith(".br")
 
 
+MIME_TYPES = {
+    ".wasm.br": "application/wasm",
+    ".js.br": "application/javascript",
+    ".json.br": "application/json",
+    ".html.br": "text/html",
+    ".css.br": "text/css",
+    ".wasm": "application/wasm",
+    ".js": "application/javascript",
+    ".json": "application/json",
+    ".html": "text/html",
+    ".css": "text/css",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".svg": "image/svg+xml",
+    ".mp3": "audio/mpeg",
+    ".wav": "audio/wav",
+    ".ogg": "audio/ogg",
+}
+
 def _get_media_type(path: str) -> str:
     """
     Get appropriate media type based on file extension.
     For .br files, returns the media type of the underlying content.
     """
     lower_path = path.lower()
-    
-    # Handle .br files - get media type of what's inside
-    if lower_path.endswith(".wasm.br"):
-        return "application/wasm"
-    if lower_path.endswith(".js.br"):
-        return "application/javascript"
-    if lower_path.endswith(".json.br"):
-        return "application/json"
-    if lower_path.endswith(".html.br"):
-        return "text/html"
-    if lower_path.endswith(".css.br"):
-        return "text/css"
+    for ext, media_type in MIME_TYPES.items():
+        if lower_path.endswith(ext):
+            return media_type
     if lower_path.endswith(".br"):
-        # Generic .br file - use octet-stream
         return "application/octet-stream"
-    
-    # Non-.br files
-    if lower_path.endswith(".wasm"):
-        return "application/wasm"
-    if lower_path.endswith(".js"):
-        return "application/javascript"
-    if lower_path.endswith(".json"):
-        return "application/json"
-    if lower_path.endswith(".html"):
-        return "text/html"
-    if lower_path.endswith(".css"):
-        return "text/css"
-    if lower_path.endswith(".png"):
-        return "image/png"
-    if lower_path.endswith(".jpg") or lower_path.endswith(".jpeg"):
-        return "image/jpeg"
-    if lower_path.endswith(".gif"):
-        return "image/gif"
-    if lower_path.endswith(".svg"):
-        return "image/svg+xml"
-    if lower_path.endswith(".mp3"):
-        return "audio/mpeg"
-    if lower_path.endswith(".wav"):
-        return "audio/wav"
-    if lower_path.endswith(".ogg"):
-        return "audio/ogg"
-    
     return "application/octet-stream"
 
 

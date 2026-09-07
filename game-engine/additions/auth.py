@@ -1,5 +1,6 @@
 import secrets
 import base64
+import binascii
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
@@ -28,7 +29,8 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
             if scheme.lower() != "basic":
                 return self._unauthorized()
             
-            decoded = base64.b64decode(credentials.encode("ascii")).decode("utf-8")
+            decoded_bytes = base64.b64decode(credentials.encode("ascii"))
+            decoded = decoded_bytes.decode("utf-8")
             if ":" not in decoded:
                 return self._unauthorized()
 
@@ -37,7 +39,7 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
             if not (secrets.compare_digest(username, self.username) and 
                     secrets.compare_digest(password, self.password)):
                 return self._unauthorized()
-        except Exception:
+        except (binascii.Error, UnicodeDecodeError, ValueError, AttributeError, Exception):
             return self._unauthorized()
 
         return await call_next(request)

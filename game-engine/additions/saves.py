@@ -11,11 +11,24 @@ if not os.path.exists(SAVES_DIR):
 
 def sanitize_token(token: str) -> str:
     """Sanitize token to prevent path traversal."""
-    # Only allow alphanumeric characters, hyphens, and underscores
-    clean_token = re.sub(r'[^a-zA-Z0-9_-]', '', token)
+    if not token:
+        return "default"
+    clean_token = token.replace('\x00', '')
+    clean_token = re.sub(r'[^a-zA-Z0-9_-]', '', clean_token)
     if not clean_token:
         clean_token = "default"
     return clean_token
+
+def sanitize_filename(filename: str) -> str:
+    """Sanitize filename to prevent path traversal."""
+    if not filename:
+        return ""
+    clean_filename = filename.replace('\x00', '')
+    safe_filename = os.path.basename(clean_filename)
+    safe_filename = re.sub(r'[^a-zA-Z0-9_.-]', '', safe_filename)
+    if safe_filename in ("", ".", "..") or not safe_filename.strip('.'):
+        return ""
+    return safe_filename
 
 @router.get("/token/get")
 async def get_token(id: str):
@@ -30,7 +43,7 @@ async def upload_save(
     file: UploadFile = File(...)
 ):
     clean_token = sanitize_token(token)
-    safe_filename = os.path.basename(fileName)
+    safe_filename = sanitize_filename(fileName)
     if not safe_filename:
         raise HTTPException(status_code=400, detail="Invalid filename")
 
@@ -45,7 +58,7 @@ async def upload_save(
 @router.get("/saves/download/{token}/{fileName}")
 async def download_save(token: str, fileName: str):
     clean_token = sanitize_token(token)
-    safe_filename = os.path.basename(fileName)
+    safe_filename = sanitize_filename(fileName)
     if not safe_filename:
         raise HTTPException(status_code=400, detail="Invalid filename")
 

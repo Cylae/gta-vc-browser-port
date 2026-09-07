@@ -97,8 +97,12 @@ async def proxy_and_cache(request: Request, url: str, local_path: str = None, di
     client = httpx.AsyncClient(timeout=None)
     headers = {k: v for k, v in request.headers.items() if k.lower() not in ["host", "content-length", "accept-encoding"]}
     
-    req = client.build_request(request.method, url, headers=headers)
-    r = await client.send(req, stream=True)
+    try:
+        req = client.build_request(request.method, url, headers=headers)
+        r = await client.send(req, stream=True)
+    except Exception:
+        await client.aclose()
+        raise
     
     excluded_headers = {"transfer-encoding", "connection", "keep-alive", "upgrade", "content-security-policy"}
     response_headers = {k: v for k, v in r.headers.items() if k.lower() not in excluded_headers}

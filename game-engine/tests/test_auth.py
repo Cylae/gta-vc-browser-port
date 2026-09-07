@@ -43,3 +43,25 @@ def test_auth_options_bypass():
     client = TestClient(create_test_app())
     response = client.options("/protected")
     assert response.status_code == 200
+
+def test_auth_malformed_base64():
+    client = TestClient(create_test_app())
+    response = client.get("/protected", headers={"Authorization": "Basic !!!invalid_base64!!!"})
+    assert response.status_code == 401
+
+def test_auth_no_colon_in_credentials():
+    client = TestClient(create_test_app())
+    creds = base64.b64encode(b"nocolonhere").decode()
+    response = client.get("/protected", headers={"Authorization": f"Basic {creds}"})
+    assert response.status_code == 401
+
+def test_auth_wrong_scheme():
+    client = TestClient(create_test_app())
+    response = client.get("/protected", headers={"Authorization": "Bearer token123"})
+    assert response.status_code == 401
+
+def test_auth_wrong_username_correct_password():
+    client = TestClient(create_test_app())
+    creds = base64.b64encode(b"wrongadmin:secretpassword").decode()
+    response = client.get("/protected", headers={"Authorization": f"Basic {creds}"})
+    assert response.status_code == 401
