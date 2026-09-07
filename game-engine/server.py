@@ -41,7 +41,10 @@ parser.add_argument("--pack", type=str, default=None,
                     help="Pack a folder to {hash}.bin archive. Can be a folder path or MD5 hash from unpacked/. "
                          "Packs all subfolders (vcsky/, vcbr/, etc.) into a single archive. "
                          "After packing, uses the archive with --packed mode to serve files.")
-args = parser.parse_args()
+if __name__ == "__main__":
+    args = parser.parse_args()
+else:
+    args, _ = parser.parse_known_args(args=[])
 
 
 def _md5_hash(text: str) -> str:
@@ -366,7 +369,8 @@ async def read_index():
         })
     return Response("index.html not found", status_code=404)
 
-app.mount("/", StaticFiles(directory="dist"), name="root")
+if os.path.exists("dist"):
+    app.mount("/", StaticFiles(directory="dist"), name="root")
 
 
 async def init_server():
