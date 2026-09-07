@@ -20,11 +20,18 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
             return self._unauthorized()
         
         try:
-            scheme, credentials = auth_header.split()
+            parts = auth_header.split(maxsplit=1)
+            if len(parts) != 2:
+                return self._unauthorized()
+
+            scheme, credentials = parts
             if scheme.lower() != "basic":
                 return self._unauthorized()
             
-            decoded = base64.b64decode(credentials).decode("utf-8")
+            decoded = base64.b64decode(credentials.encode("ascii")).decode("utf-8")
+            if ":" not in decoded:
+                return self._unauthorized()
+
             username, password = decoded.split(":", 1)
             
             if not (secrets.compare_digest(username, self.username) and 

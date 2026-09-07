@@ -14,6 +14,10 @@ ENV PUBLIC_GAME_URL=${PUBLIC_GAME_URL}
 
 RUN pnpm build
 
+RUN chown -R node:node /app
+
+USER node
+
 EXPOSE 4321
 
 HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://localhost:4321/ || exit 1
