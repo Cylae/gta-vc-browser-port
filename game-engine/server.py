@@ -309,8 +309,11 @@ async def vc_sky_proxy(request: Request, path: str):
     
     # Try local directory
     if VCSKY_LOCAL_PATH:
-        local_path = os.path.join(VCSKY_LOCAL_PATH, path)
-        if response := get_local_file(local_path, request):
+        normalized_base = os.path.abspath(VCSKY_LOCAL_PATH)
+        target_path = os.path.abspath(os.path.join(VCSKY_LOCAL_PATH, path))
+        if not (target_path == normalized_base or target_path.startswith(normalized_base + os.sep)):
+            raise HTTPException(status_code=400, detail="Invalid path")
+        if response := get_local_file(target_path, request):
             return response
         # If local mode is explicitly set, don't fall through to proxy
         if args.vcsky_local is not None or args.unpacked:
@@ -335,8 +338,11 @@ async def vc_br_proxy(request: Request, path: str):
     
     # Try local directory
     if VCBR_LOCAL_PATH:
-        local_path = os.path.join(VCBR_LOCAL_PATH, path)
-        if response := get_local_file(local_path, request):
+        normalized_base = os.path.abspath(VCBR_LOCAL_PATH)
+        target_path = os.path.abspath(os.path.join(VCBR_LOCAL_PATH, path))
+        if not (target_path == normalized_base or target_path.startswith(normalized_base + os.sep)):
+            raise HTTPException(status_code=400, detail="Invalid path")
+        if response := get_local_file(target_path, request):
             return response
         # If local mode is explicitly set, don't fall through to proxy
         if args.vcbr_local is not None or args.unpacked:

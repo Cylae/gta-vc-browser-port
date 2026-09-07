@@ -110,7 +110,7 @@ This report presents a full technical audit of the **GTA Vice City Browser Port*
 
 | Priority | Category | Recommendation | Status |
 |---|---|---|---|
-| **High** | Security | Sanitize `token` parameter in `game-engine/additions/saves.py` | Recommended Fix |
-| **Medium** | Security | Remove legacy `game-engine/index.php` or align with Python server | Recommended Fix |
-| **Medium** | DevOps | Configure non-root execution in Dockerfiles | Recommended Improvement |
-| **Low** | Testing | Maintain and expand automated test coverage in `game-engine/tests/` | Implemented Base Tests |
+| **High** | Security | Sanitize `token` parameter in `game-engine/additions/saves.py` | Implemented |
+| **Medium** | Security | Remove legacy `game-engine/index.php` or align with Python server | Implemented |
+| **Medium** | DevOps | Configure non-root execution & healthchecks in Dockerfiles | Implemented |
+| **Low** | Testing | Maintain and expand automated test coverage in `game-engine/tests/` | Implemented |

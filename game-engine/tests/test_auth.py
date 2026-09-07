@@ -2,7 +2,7 @@ import base64
 import pytest
 from fastapi import FastAPI, Request
 from fastapi.responses import PlainTextResponse
-from starlette.testclient import TestClient
+from fastapi.testclient import TestClient
 
 from additions.auth import BasicAuthMiddleware
 

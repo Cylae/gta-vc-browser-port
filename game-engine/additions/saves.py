@@ -36,6 +36,11 @@ async def get_token(id: str):
     clean_id = sanitize_token(id)
     return {"token": clean_id, "premium": True, "email": "local@user"}
 
+def _is_safe_save_path(save_path: str) -> bool:
+    abs_saves_dir = os.path.abspath(SAVES_DIR)
+    abs_save_path = os.path.abspath(save_path)
+    return abs_save_path.startswith(abs_saves_dir + os.sep)
+
 @router.post("/saves/upload")
 async def upload_save(
     token: str = Form(...),
@@ -48,6 +53,8 @@ async def upload_save(
         raise HTTPException(status_code=400, detail="Invalid filename")
 
     save_path = os.path.join(SAVES_DIR, f"{clean_token}_{safe_filename}")
+    if not _is_safe_save_path(save_path):
+        raise HTTPException(status_code=400, detail="Invalid save path")
     
     with open(save_path, "wb") as f:
         content = await file.read()
@@ -63,6 +70,8 @@ async def download_save(token: str, fileName: str):
         raise HTTPException(status_code=400, detail="Invalid filename")
 
     save_path = os.path.join(SAVES_DIR, f"{clean_token}_{safe_filename}")
+    if not _is_safe_save_path(save_path):
+        raise HTTPException(status_code=400, detail="Invalid save path")
     
     if not os.path.exists(save_path):
         return JSONResponse(status_code=404, content={"error": "File not found"})
