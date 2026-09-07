@@ -1,0 +1,71 @@
+import os
+import pytest
+from fastapi import FastAPI
+from starlette.testclient import TestClient
+
+from additions.saves import router
+
+def create_test_app():
+    app = FastAPI()
+    app.include_router(router)
+    return app
+
+def test_get_token():
+    client = TestClient(create_test_app())
+    response = client.get("/token/get?id=abc12")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["token"] == "abc12"
+    assert data["premium"] is True
+
+def test_upload_and_download_save(tmp_path, monkeypatch):
+    saves_dir = tmp_path / "saves"
+    saves_dir.mkdir()
+    monkeypatch.setattr("additions.saves.SAVES_DIR", str(saves_dir))
+
+    client = TestClient(create_test_app())
+
+    file_content = b"DUMMY SAVE DATA"
+    upload_res = client.post(
+        "/saves/upload",
+        data={"token": "tok123", "fileName": "slot1.sav"},
+        files={"file": ("slot1.sav", file_content, "application/octet-stream")}
+    )
+    assert upload_res.status_code == 200
+    assert upload_res.json() == {"success": True}
+
+    expected_file = saves_dir / "tok123_slot1.sav"
+    assert expected_file.exists()
+    assert expected_file.read_bytes() == file_content
+
+    download_res = client.get("/saves/download/tok123/slot1.sav")
+    assert download_res.status_code == 200
+    assert download_res.content == file_content
+
+def test_download_nonexistent_save(tmp_path, monkeypatch):
+    saves_dir = tmp_path / "saves"
+    saves_dir.mkdir()
+    monkeypatch.setattr("additions.saves.SAVES_DIR", str(saves_dir))
+
+    client = TestClient(create_test_app())
+    download_res = client.get("/saves/download/tok123/nonexistent.sav")
+    assert download_res.status_code == 404
+
+def test_path_traversal_protection(tmp_path, monkeypatch):
+    saves_dir = tmp_path / "saves"
+    saves_dir.mkdir()
+    monkeypatch.setattr("additions.saves.SAVES_DIR", str(saves_dir))
+
+    client = TestClient(create_test_app())
+
+    # Attempting path traversal in fileName
+    upload_res = client.post(
+        "/saves/upload",
+        data={"token": "tok123", "fileName": "../../../etc/passwd"},
+        files={"file": ("passwd", b"root:x:0:0", "text/plain")}
+    )
+    assert upload_res.status_code == 200
+    # os.path.basename ensures filename becomes "passwd", so file is saved inside saves/tok123_passwd
+    expected_file = saves_dir / "tok123_passwd"
+    assert expected_file.exists()
+    assert not (tmp_path / "passwd").exists()
