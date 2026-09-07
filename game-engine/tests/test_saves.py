@@ -58,14 +58,15 @@ def test_path_traversal_protection(tmp_path, monkeypatch):
 
     client = TestClient(create_test_app())
 
-    # Attempting path traversal in fileName
+    # Attempting path traversal in fileName and token
     upload_res = client.post(
         "/saves/upload",
-        data={"token": "tok123", "fileName": "../../../etc/passwd"},
+        data={"token": "../../bad_token", "fileName": "../../../etc/passwd"},
         files={"file": ("passwd", b"root:x:0:0", "text/plain")}
     )
     assert upload_res.status_code == 200
-    # os.path.basename ensures filename becomes "passwd", so file is saved inside saves/tok123_passwd
-    expected_file = saves_dir / "tok123_passwd"
+    # Token "../../bad_token" is sanitized to "bad_token" and fileName to "passwd"
+    expected_file = saves_dir / "bad_token_passwd"
     assert expected_file.exists()
     assert not (tmp_path / "passwd").exists()
+    assert not (tmp_path / "bad_token_passwd").exists()
