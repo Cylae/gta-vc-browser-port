@@ -16,4 +16,6 @@ USER appuser
 ENV PYTHONUNBUFFERED=1
 EXPOSE 8000
 
+HEALTHCHECK --interval=30s --timeout=3s CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/').read()" || exit 1
+
 CMD ["python", "server.py", "--port", "8000", "--packed", "https://folder.morgen.qzz.io/revcdos.bin"]
