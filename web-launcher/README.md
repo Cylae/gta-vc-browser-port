@@ -101,9 +101,12 @@ web-launcher/
         └── launcher.ts    # backend ping, mount/unmount, keybinds
 ```
 
-## Build for static hosting
+## Testing & Build Verification
+
+To test and verify the web launcher application build:
 
 ```bash
+pnpm install
 pnpm build      # outputs ./dist
 pnpm preview    # serves the built site
 ```
