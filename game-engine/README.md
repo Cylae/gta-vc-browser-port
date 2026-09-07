@@ -107,6 +107,24 @@ Examples: `http://localhost:8443/?lang=ru`, `http://localhost:8443/?cheats=1&max
 
 When `--custom_saves` (or `CUSTOM_SAVES=1`) is on, enter any 5-character identifier in the "js-dos key" input on the start page. Saves land in `saves/<key>_vcsky.saves` on the server.
 
+## Testing
+
+Run the full backend test suite using pytest:
+
+```bash
+pip install -r requirements.txt pytest pytest-asyncio httpx
+PYTHONPATH=. python -m pytest tests
+```
+
+Tests cover authentication middleware, path traversal protection, save management, Brotli archive compression/decompression, async streaming, and FastAPI routes.
+
+## Security Features & Optimizations
+
+- **Path Traversal Protection**: Save tokens and filenames are sanitized using regex filtering and null byte removal.
+- **Resource Cleanup**: HTTP proxy connections (`httpx.AsyncClient`) are strictly cleaned up on network disconnects or exceptions.
+- **Fast MIME Lookup**: Pre-cached extension-to-MIME dictionary for sub-millisecond header generation.
+- **Memory Optimization**: `PackedArchive` and binary signature structures use dataclass `slots=True` to minimize RAM overhead.
+
 ## License and credit
 
 MIT. Originally built by the DOS Zone team and deobfuscated by [@Lolendor](https://github.com/Lolendor). See [LICENSE](./LICENSE). Not affiliated with Rockstar Games.

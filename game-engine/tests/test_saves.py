@@ -70,3 +70,27 @@ def test_path_traversal_protection(tmp_path, monkeypatch):
     assert expected_file.exists()
     assert not (tmp_path / "passwd").exists()
     assert not (tmp_path / "bad_token_passwd").exists()
+
+def test_invalid_and_empty_filename_upload(tmp_path, monkeypatch):
+    saves_dir = tmp_path / "saves"
+    saves_dir.mkdir()
+    monkeypatch.setattr("additions.saves.SAVES_DIR", str(saves_dir))
+
+    client = TestClient(create_test_app())
+
+    # Upload with filename that reduces to empty after sanitization
+    upload_res = client.post(
+        "/saves/upload",
+        data={"token": "tok1", "fileName": "..."},
+        files={"file": ("test.sav", b"data", "application/octet-stream")}
+    )
+    assert upload_res.status_code == 400
+
+def test_download_save_invalid_filename(tmp_path, monkeypatch):
+    saves_dir = tmp_path / "saves"
+    saves_dir.mkdir()
+    monkeypatch.setattr("additions.saves.SAVES_DIR", str(saves_dir))
+
+    client = TestClient(create_test_app())
+    download_res = client.get("/saves/download/tok1/...")
+    assert download_res.status_code == 400

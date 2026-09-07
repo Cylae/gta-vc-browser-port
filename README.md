@@ -78,6 +78,37 @@ gta-vc-browser-port/
 
 Default image runs with sane defaults. To override (custom port, auth, local assets, packed/unpacked modes, language), use the compose flow and read [game-engine/README.md](./game-engine/README.md) for the full env var and CLI flag tables.
 
+## Testing & Quality Assurance
+
+The codebase includes automated unit test suites for the game engine and build verification for the web launcher.
+
+### Backend Engine Tests (PyTest)
+
+To run the full backend test suite:
+
+```bash
+pip install -r game-engine/requirements.txt pytest pytest-asyncio httpx
+PYTHONPATH=game-engine python -m pytest game-engine/tests
+```
+
+Test coverage includes:
+- **Authentication (`test_auth.py`)**: Basic Auth header parsing, CORS bypass, malformed base64, missing fields.
+- **Save Operations & Security (`test_saves.py`)**: Token and filename sanitization, path traversal prevention, null byte protection.
+- **Cache & Decompression (`test_cache.py`)**: Local file serving, client Brotli header evaluation, on-the-fly streaming decompression, resource cleanup.
+- **Packed Archive (`test_packed.py`)**: Packed `.bin` loading, streaming responses, Brotli passthrough, and URL resolution.
+- **Brotli Packing (`test_packer.py`, `test_downloader.py`)**: ULEB128 encoding/decoding, folder & file deduplication, parallel Brotli quality-11 compression, async streaming unpack.
+- **FastAPI Server (`test_server.py`)**: Route handling, `dist/index.html` script injection, CLI argument parsing isolation.
+
+### Web Launcher Verification
+
+To build and verify the static web launcher application:
+
+```bash
+cd web-launcher
+pnpm install
+pnpm build
+```
+
 ## License and credit
 
 Backend is MIT, originally by [DOS Zone](https://dos.zone) and [@Lolendor](https://github.com/Lolendor). See [game-engine/LICENSE](./game-engine/LICENSE). Not affiliated with Rockstar Games.
